@@ -1,8 +1,5 @@
 from functions.level_2.five_replace_word import replace_word
-
-
-def _str_multiplier(string: str, count: int, sep: str) -> str:
-    return sep.join(count * (string,))
+from tests.level_2.conftest import gen_str
 
 
 def test__replace_word__simple_replace_matching_word():
@@ -15,27 +12,26 @@ def test__replace_word__simple_return_words_with_empty_from_to_words():
 
 def test__replace_word__replace_matching_from_word():
     r_from, r_to = 'from_word', 'to_word'
-    assert replace_word(f'replace {r_from}', r_from, r_to) == f'replace {r_to}'
+    assert replace_word(f'replace from_word', 'from_word', 'r_to') == f'replace r_to'
 
 
-def test__replace_word__replace_all_matching_from_words():
-    r_from, r_to, wc, sep = 'from_word', 'to_word', 3, ' and '
+def test__replace_word__replace_multiple_words(gen_str):
+    r_from, r_to, wc, sep = 'from_word', 'to_word', 33, ' and '
+    starting_text, resulting_text = gen_str(r_from, wc, sep), gen_str(r_to, wc, sep)
+    assert replace_word(starting_text, r_from, r_to) == resulting_text
 
-    assert replace_word(_str_multiplier(r_from, wc, sep), r_from, r_to) == _str_multiplier(r_to, wc, sep)
 
+def test__replace_word__replace_single_word_with_non_matching_case():
+    assert replace_word('word in wOrDs', 'wOrd', 'w0rd')
 
-def test__replace_word__return_replaced_all_words_with_mixed_case():
-    r_from, r_to, wc, sep = 'MatchinG_FrOm_wOrd', 'MatchiNg_to_worD', 3, ' and '
-
-    assert replace_word(_str_multiplier(r_from, wc, sep), r_from, r_to) == _str_multiplier(r_to, wc, sep)
+def test__replace_word__replace_multiple_words_with_non_matching_case(gen_str):
+    r_from, r_to, wc, sep = 'MatchinG_FrOm_wOrd', 'MatchiNg_to_worD', 44, ' and '
+    starting_text, expected_text = gen_str(r_from, wc, sep), gen_str(r_to, wc, sep)
+    assert replace_word(starting_text, r_from, r_to) == expected_text
 
 
 def test__replace_word__return_original_words_with_no_matching_from_word_and_matching_to_word():
-    r_from = 'from_word'
-    r_to = f'non_matching_{r_from}'
-    words = f'no match {r_to} - leave as is'
-
-    assert replace_word(words, r_from, r_to) == words
+    assert replace_word('asdf asdf', 'fdsa', 'dsaf') == 'asdf asdf'
 
 
 def test__replace_word__return_empty_with_no_words():

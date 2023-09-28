@@ -24,8 +24,8 @@ def test__check_tweet_sentiment__return_none_with_equal_good_and_bad_word_counts
 
 def test__check_tweet_sentiment__return_good_many_words_with_more_good_words():
     good_word_count, bad_word_count = 5, 3
-    bad_words = {'bad_' + str(i + 1) for i in range(bad_word_count)}
-    good_words = {'good_' + str(i + 1) for i in range(good_word_count)}
+    bad_words = {f'bad_{i + 1}' for i in range(bad_word_count)}
+    good_words = {f'good_{i + 1}' for i in range(good_word_count)}
     text = ' '.join(good_words.union(bad_words))
 
     assert check_tweet_sentiment(text, good_words, bad_words) == "GOOD"
@@ -33,8 +33,8 @@ def test__check_tweet_sentiment__return_good_many_words_with_more_good_words():
 
 def test__check_tweet_sentiment__many_good_and_bad_words_with_more_bad_words():
     good_word_count, bad_word_count = 3, 6
-    bad_words = {'bad_' + str(i + 1) for i in range(bad_word_count)}
-    good_words = {'good_' + str(i + 1) for i in range(good_word_count)}
+    bad_words = {f'bad_{i + 1}' for i in range(bad_word_count)}
+    good_words = {f'good_{i + 1}' for i in range(good_word_count)}
     text = ' '.join(good_words.union(bad_words))
 
     assert check_tweet_sentiment(text, good_words, bad_words) == "BAD"

@@ -1,23 +1,26 @@
-from functions.level_1.two_date_parser import compose_datetime_from
-
 import datetime
+import pytest
 import random
 
-
-def test_compose_datetime_from_today():
-    today = datetime.date.today()
-    test_hours, test_minutes = random.choice(range(1, 24)), random.choice(range(10, 60))
-    test_time_str = f'{test_hours}:{test_minutes}'
-    expected_datetime_today = datetime.datetime(today.year, today.month, today.day, test_hours, test_minutes)
-
-    assert expected_datetime_today == compose_datetime_from("someday today", test_time_str)
+from functions.level_1.two_date_parser import compose_datetime_from
 
 
-def test_compose_datetime_from_tomorrow():
-    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-    test_hours, test_minutes = random.choice(range(1, 24)), random.choice(range(10, 60))
-    test_time_str = f'{test_hours}:{test_minutes}'
-    expected_datetime_tomorrow = datetime.datetime(tomorrow.year, tomorrow.month, tomorrow.day, test_hours, test_minutes)
-
-    assert expected_datetime_tomorrow == compose_datetime_from("tomorrow", test_time_str)
+@pytest.mark.parametrize(
+    'date, hours, minutes, is_tomorrow',
+    [
+        (datetime.date.today(), 00, 00, False),
+        (datetime.date.today(), 23, 59, False),
+        (datetime.date.today(), random.choice(range(1, 24)), random.choice(range(10, 60)), False),
+        (datetime.date.today() + datetime.timedelta(days=1), 00, 00, True),
+        (datetime.date.today() + datetime.timedelta(days=1), 23, 59, True),
+        (datetime.date.today() + datetime.timedelta(days=1), random.choice(range(1, 24)), random.choice(range(10, 60)),
+         True),
+    ]
+)
+def test_compose_datetime_from_today_tomorrow(date: datetime.datetime, hours: int, minutes: int, is_tomorrow: bool):
+    assert compose_datetime_from(
+        "tomorrow" if is_tomorrow else "today", f'{hours}:{minutes}'
+    ) == datetime.datetime(
+        date.year, date.month, date.day, hours, minutes
+    )
 
