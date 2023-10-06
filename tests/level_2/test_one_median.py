@@ -1,5 +1,6 @@
-from functions.level_2.one_median import get_median_value
 import pytest
+
+from functions.level_2.one_median import get_median_value
 
 
 def test__get_median_value__with_no_items():

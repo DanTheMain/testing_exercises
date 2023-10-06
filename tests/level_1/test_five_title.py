@@ -1,6 +1,8 @@
-import pytest
-from random import choice, choices
 import string
+from random import choice, choices, randint
+
+import pytest
+
 from functions.level_1.five_title import change_copy_item
 
 
@@ -26,23 +28,14 @@ def test__change_copy_item__return_default_title_with_default_max_title_length()
 
 
 def test__change_copy_item__with_title_starting_with_copy_of_text_return_copy_of_title_combined():
-    additional_copy_text: str = 'Copy of'
-    sample_title: str = "sample"
-    assert f'{additional_copy_text} {sample_title}' == change_copy_item(sample_title)
+    assert f'Copy of sample' == change_copy_item('sample')
 
 
-def test__change_copy_item__title_starting_with_copy_of_text_with_copy_number_return_incremented_copy_number_title():
-    additional_copy_text: str = 'Copy of'
-    sample_title: str = "sample"
-    sample_copy_number = 0
-    sample_title_with_copy_number = f'{additional_copy_text} {sample_title} ({sample_copy_number})'
-    assert (
-            f'{additional_copy_text} {sample_title} ({sample_copy_number + 1})' ==
-            change_copy_item(sample_title_with_copy_number)
-    )
+def test__change_copy_item__copy_number_is_incremented_when_available():
+    sample_copy_number = randint(0, 99)
+    assert change_copy_item(f'Copy of sample ({sample_copy_number})') == f'Copy of sample ({sample_copy_number + 1})'
 
 
-def test__change_copy_item__title_starting_with_copy_of_text_and_no_copy_number():
-    additional_copy_text: str = 'Copy of'
-    assert f'{additional_copy_text} (2)' == change_copy_item(additional_copy_text)
+def test__change_copy_item__copy_number_is_added():
+    assert change_copy_item('Copy of') == f'Copy of (2)'
 

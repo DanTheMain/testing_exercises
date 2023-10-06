@@ -1,5 +1,6 @@
-from functions.level_2.two_square_equation import solve_square_equation
 import random
+
+from functions.level_2.two_square_equation import solve_square_equation
 
 
 def test__solve_square_equation__return_none_with_negative_discriminant():
