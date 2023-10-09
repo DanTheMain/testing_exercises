@@ -1,69 +1,97 @@
 import datetime
 import decimal
+import pytest
 
-from functions.level_1.four_bank_parser import BankCard, SmsMessage, parse_ineco_expense
+from functions.level_1.four_bank_parser import BankCard, parse_ineco_expense
 
 
-def test__parse_ineco_expense__card_last_digits():
-    expected_last_digits, expected_owner_name = '1234', 'matching_card_owner_1'
-    test_cards = [BankCard(last_digits=f'{expected_last_digits}', owner=f'{expected_owner_name}'),
-                  BankCard(last_digits='5432', owner='non_matching_card_owner_1'),
-                  BankCard(last_digits=f'{expected_last_digits}', owner='non_matching_card_owner_2')]
-    test_sms = SmsMessage(
-        text='12.34 $, "000001234 11.11.11 11:11 test_shop authcode TEST_AUTHCODE',
-        author='test_author',
-        sent_at=datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S'),
+def test__parse_ineco_expense__card_last_digits(
+    test_sms, test_bank_card, get_random_4_digit_integer_str
+):
+    last_digits: str = get_random_4_digit_integer_str
+    test_cards: list[BankCard] = [
+        test_bank_card(last_digits=last_digits),
+        test_bank_card(),
+        test_bank_card(last_digits=last_digits),
+    ]
+
+    assert (
+        parse_ineco_expense(
+            test_sms(card_last_digits=last_digits), test_cards
+        ).card.last_digits
+        == last_digits
     )
 
-    assert parse_ineco_expense(test_sms, test_cards).card.last_digits == expected_last_digits
 
+def test__ineco_expense__card_choice_owner_name(
+    test_sms, test_bank_card, bank_card_last_digits
+):
+    expected_owner_name: str = "matching_card_owner_1"
+    last_digits: str = bank_card_last_digits
+    test_cards: list[BankCard] = [
+        test_bank_card(owner_name=expected_owner_name),
+        test_bank_card(),
+        test_bank_card(),
+    ]
 
-def test__ineco_expense__card_choice_owner_name():
-    expected_last_digits, expected_owner_name = '1234', 'matching_card_owner_1'
-    test_cards = [BankCard(last_digits=f'{expected_last_digits}', owner=f'{expected_owner_name}'),
-                  BankCard(last_digits='5432', owner='non_matching_card_owner_1'),
-                  BankCard(last_digits=f'{expected_last_digits}', owner='non_matching_card_owner_2')]
-    test_sms = SmsMessage(
-        text='12.34 $, "000001234 11.11.11 11:11 test_shop authcode TEST_AUTHCODE',
-        author='test_author',
-        sent_at=datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S'),
+    assert (
+        parse_ineco_expense(
+            test_sms(card_last_digits=last_digits), test_cards
+        ).card.owner
+        == expected_owner_name
     )
 
-    assert parse_ineco_expense(test_sms, test_cards).card.owner == expected_owner_name
+
+def test__ineco_expense_card__parse_amount_correctly(
+    test_sms, test_bank_card, spent_amount_str, bank_card_last_digits
+):
+    test_amount_str = spent_amount_str
+
+    assert parse_ineco_expense(
+        test_sms(card_last_digits=bank_card_last_digits, spent_amount=spent_amount_str),
+        [test_bank_card(last_digits=bank_card_last_digits)],
+    ).amount == decimal.Decimal(test_amount_str)
 
 
-def test__ineco_expense_card__parse_amount_correctly():
-    test_amount_str = "12.34"
-    test_sms = SmsMessage(
-        text=f'{test_amount_str} $, "000001234 11.11.11 11:11 test_shop authcode TEST_AUTHCODE',
-        author='test_author',
-        sent_at=datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S'))
-    test_cards = [BankCard(last_digits='1234', owner='matching_card_owner_1')]
+def test__ineco_expense_card__spent_in_name(
+    test_sms, test_bank_card, spent_in_name, bank_card_last_digits
+):
+    spent_in = spent_in_name
 
-    assert parse_ineco_expense(test_sms, test_cards).amount == decimal.Decimal(f"{test_amount_str}")
-
-
-def test__ineco_expense_card__spent_in_name():
-    spent_in_str = 'test_shop'
-    test_sms = SmsMessage(
-        text=f'12.34 $, "000001234 11.11.11 11:11 {spent_in_str} authcode TEST_AUTHCODE',
-        author='test_author',
-        sent_at=datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S'),
+    assert (
+        parse_ineco_expense(
+            test_sms(card_last_digits=bank_card_last_digits, spent_in=spent_in),
+            [test_bank_card(last_digits=bank_card_last_digits)],
+        ).spent_in
+        == spent_in
     )
-    test_cards = [BankCard(last_digits='1234', owner='matching_card_owner_1')]
-
-    assert parse_ineco_expense(test_sms, test_cards).spent_in == spent_in_str
 
 
-def test__ineco_expense_card__spent_at_datetime():
-    test_dt_str = '11.11.11 11:11'
-    test_sms = SmsMessage(
-        text=f'12.34 $, "000001234 {test_dt_str} test_shop authcode TEST_AUTHCODE',
-        author='test_author',
-        sent_at=datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S'),
+def test__ineco_expense_card__spent_at_datetime(
+    test_sms, test_bank_card, spent_datetime_str, bank_card_last_digits
+):
+    test_datetime = spent_datetime_str
+
+    assert parse_ineco_expense(
+        test_sms(card_last_digits=bank_card_last_digits, spent_datetime=test_datetime),
+        [test_bank_card(last_digits=bank_card_last_digits)],
+    ).spent_at == datetime.datetime.strptime(test_datetime, "%m.%d.%y %H:%M")
+
+
+@pytest.mark.xfail(reason='failure to support cards with non-matching last digits', raises=IndexError)
+def test__ineco_expense_card__error_when_last_digits_in_sms_have_no_matching_cards(
+    test_sms, test_bank_card, bank_card_last_digits
+):
+    last_digits: str = '4321'
+    non_matching_last_digits: str = last_digits[::-1]
+    test_cards: list[BankCard] = [
+        test_bank_card(last_digits=last_digits),
+        test_bank_card(),
+        test_bank_card(last_digits=last_digits),
+    ]
+
+    assert (
+        parse_ineco_expense(
+            test_sms(card_last_digits=non_matching_last_digits), test_cards
+        ).card.last_digits
     )
-    test_cards = [BankCard(last_digits='1234', owner='matching_card_owner_1')]
-    expected_dt = datetime.datetime.strptime('11/11/11 11:11:00', '%m/%d/%y %H:%M:%S')
-
-    assert parse_ineco_expense(test_sms, test_cards).spent_at == expected_dt
-
