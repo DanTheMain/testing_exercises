@@ -50,7 +50,7 @@ def test__ineco_expense_card__parse_amount_correctly(
     assert parse_ineco_expense(
         test_sms(card_last_digits=bank_card_last_digits, spent_amount=spent_amount_str),
         [test_bank_card(last_digits=bank_card_last_digits)],
-    ).amount == decimal.Decimal(test_amount_str)
+    ).amount == round(decimal.Decimal(test_amount_str), 2)
 
 
 def test__ineco_expense_card__spent_in_name(

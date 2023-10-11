@@ -1,5 +1,3 @@
-from random import randint
-
 import pytest
 
 from functions.level_1.five_title import change_copy_item
@@ -28,9 +26,11 @@ def test__change_copy_item__with_title_starting_with_copy_of_text_return_copy_of
     assert f'Copy of sample' == change_copy_item('sample')
 
 
-def test__change_copy_item__copy_number_is_incremented_when_available():
-    sample_copy_number = randint(0, 99)
-    assert change_copy_item(f'Copy of sample ({sample_copy_number})') == f'Copy of sample ({sample_copy_number + 1})'
+@pytest.mark.parametrize(
+    'copy_number', [0, 1, 99]
+)
+def test__change_copy_item__copy_number_is_incremented_when_available(copy_number):
+    assert change_copy_item(f'Copy of sample ({copy_number})') == f'Copy of sample ({copy_number + 1})'
 
 
 def test__change_copy_item__copy_number_is_added():
