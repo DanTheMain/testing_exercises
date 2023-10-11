@@ -1,5 +1,4 @@
-import string
-from random import choice, choices, randint
+from random import randint
 
 import pytest
 
@@ -10,10 +9,8 @@ from functions.level_1.five_title import change_copy_item
     'title_base, length, increment',
     [
         ('a', 1, 0),
-        ('a', 1, 1),
-        (choices(string.ascii_letters, k=choice(range(2, 10))), 10, 0),
-        (choice(string.ascii_letters), choice(range(2, 99)), 1),
-        (choices(string.ascii_letters, k=choice(range(2, 10))), choice(range(2, 99)), 1),
+        ('b', 1, 1),
+        ('c', 1, 99),
     ])
 def test__change_copy_item__title_length_specifications(title_base: str, length: int | None, increment: int):
     title = f"{title_base * (length + increment)}"

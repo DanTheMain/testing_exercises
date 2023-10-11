@@ -21,16 +21,16 @@ def bank_card_last_digits(get_random_4_digit_integer_str) -> str:
 
 @pytest.fixture()
 def spent_in_name() -> str:
-    return fake.company()
+    return fake.company().replace(',', '')
 
 
 @pytest.fixture()
-def spent_amount_str() -> float:
-    return fake.pyfloat(left_digits=2, right_digits=2, positive=True)
+def spent_amount_str() -> str:
+    return str(fake.pyfloat(left_digits=2, right_digits=2, positive=True))
 
 
 @pytest.fixture()
-def spent_datetime_str() ->str:
+def spent_datetime_str() -> str:
     return '11.11.11 11:11'
 
 

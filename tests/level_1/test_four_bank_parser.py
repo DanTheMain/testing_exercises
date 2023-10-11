@@ -95,3 +95,23 @@ def test__ineco_expense_card__error_when_last_digits_in_sms_have_no_matching_car
             test_sms(card_last_digits=non_matching_last_digits), test_cards
         ).card.last_digits
     )
+
+
+@pytest.mark.xfail(reason='failure to support business names with commas', raises=ValueError)
+def test__ineco_expense_card__spent_in_name_with_commas(
+    test_sms, test_bank_card, spent_in_name, bank_card_last_digits
+):
+    spent_in = 'Something, Rather, And , Sons'
+
+    assert (
+        parse_ineco_expense(
+            test_sms(
+                card_last_digits=bank_card_last_digits,
+                spent_in=spent_in
+            ),
+            [
+                test_bank_card(last_digits=bank_card_last_digits),
+            ],
+        ).spent_in
+        == spent_in
+    )
