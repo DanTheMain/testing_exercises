@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from functions.level_4.three_promocodes import generate_promocode
 
 

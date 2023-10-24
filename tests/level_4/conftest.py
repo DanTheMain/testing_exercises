@@ -1,11 +1,12 @@
 import os
 import string
 import tempfile
-import pytest
 from random import choice
-from faker import Faker
-from functions.level_4.two_students import Student
 
+import pytest
+from faker import Faker
+
+from functions.level_4.two_students import Student
 
 fake = Faker()
 
@@ -61,33 +62,28 @@ def generate_test_promocode(promocode_test_len, promocode_test_char):
 
 
 @pytest.fixture
-def student_first_name():
-    return fake.first_name()
+def generate_first_name():
+    return lambda: fake.first_name()
 
 
 @pytest.fixture
-def student_last_name():
-    return fake.last_name()
+def generate_last_name():
+    return lambda: fake.last_name()
 
 
 @pytest.fixture()
-def generate_telegram_account_and_username():
-
-    def inner():
-        account = f'{fake.ascii_safe_email()}'
-        return account, account.strip('@')
-
-    return inner
+def generate_telegram_account():
+    return lambda: f'{fake.ascii_safe_email()}'
 
 
 @pytest.fixture
-def generate_test_student(student_first_name, student_last_name, generate_telegram_account_and_username):
+def generate_test_student(generate_first_name, generate_last_name, generate_telegram_account):
 
-    def inner(first_name: str | None, last_name: str | None, telegram_account: str | None):
+    def inner(first_name: str | None = None, last_name: str | None = None, telegram_account: str | None = None):
         return Student(
-            first_name=first_name or student_first_name,
-            last_name=last_name or student_last_name,
-            telegram_account=telegram_account if telegram_account else generate_telegram_account_and_username()[0]
+            first_name=first_name or generate_first_name(),
+            last_name=last_name or generate_last_name(),
+            telegram_account=telegram_account if telegram_account else generate_telegram_account()
         )
 
     return inner
@@ -96,8 +92,8 @@ def generate_test_student(student_first_name, student_last_name, generate_telegr
 @pytest.fixture
 def generate_test_students(generate_test_student):
 
-    def inner(student_amount: int):
-        return [generate_test_student() for _ in range(student_amount)]
+    def inner(student_amount: int | None = None):
+        return [generate_test_student() for _ in range(student_amount or choice(range(2, 10)))]
 
     return inner
 

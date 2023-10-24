@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from functions.level_4.five_extra_fields import fetch_extra_fields_configuration, fetch_app_config_field
 
 
